@@ -1,0 +1,165 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+
+  role      Role     @default(USER)
+  
+  // Preferencias (No sensibles)
+  locale    String   @default("es-LATAM")
+  country   String?  // País seleccionado para "ayuda ahora"
+  timezone  String?
+
+  // Perfil flexible para guardar onboarding
+  // Ej: { "issues": ["stress", "anxiety"], "experienceLevel": "beginner" }
+  profile   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete para cumplir con GDPR/Privacidad temporalmente
+
+  // Relaciones futuras (dejamos placeholders comentados)
+  entitlements SubscriptionEntitlement?
+  consent      Consent?
+
+  syncRecords  SyncRecord[]
+}
+
+model Consent {
+  id        String   @id @default(uuid())
+  
+  // Relación 1 a 1 con User
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Los permisos (flags)
+  analytics Boolean  @default(false) // ¿Podemos trackear eventos?
+  sync      Boolean  @default(false) // ¿Podemos guardar datos en la nube?
+  
+  policyVersion String @default("1.0") // Para saber qué versión aceptaron
+  updatedAt     DateTime @updatedAt
+}
+
+model SubscriptionEntitlement {
+  id        String   @id @default(uuid())
+  
+  userId    String   @unique // Un registro de estado por usuario
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status    String   @default("FREE") // FREE, ACTIVE, EXPIRED, TRIAL
+  expiresAt DateTime? 
+  
+  // Detalles de la última compra válida
+  platform  String?  // 'apple' o 'google'
+  productId String?  // ej: 'premium_monthly'
+  
+  updatedAt DateTime @updatedAt
+}
+
+model PurchaseReceipt {
+  id            String   @id @default(uuid())
+  userId        String
+  
+  platform      String   // 'apple' o 'google'
+  transactionId String   // ID único de la transacción en la tienda
+  productId     String
+  
+  // Guardamos el recibo crudo por seguridad/auditoría (puede ser largo)
+  rawReceipt    String   @db.Text 
+  
+  validatedAt   DateTime @default(now())
+  status        String   // 'VALID', 'INVALID'
+}
+
+
+model ContentItem {
+  id          String   @id @default(uuid())
+  
+  // Metadatos de clasificación
+  type        String   // 'route', 'day', 'exercise', 'article'
+  title       String
+  description String?
+  topic       String?  // Ej: 'ansiedad', 'depresion', 'dormir'
+  locale      String   @default("es-LATAM")
+  
+  version     Int      @default(1) // Para control de versiones
+  isPublished Boolean  @default(true)
+
+  // Define si es de pago o gratuito
+  isPremium   Boolean  @default(true) // Por defecto todo es Premium, salvo que se marque gratis
+
+  // El contenido real (Flexible: puede tener URLs de video, texto markdown, pasos, etc.)
+  body        Json     
+
+  // Compliance / Legal
+  sources     String[] // Links a papers o fuentes
+  disclaimerId String? // ID del disclaimer legal a mostrar
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SyncRecord {
+  id        String   @id @default(uuid())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identificadores del dato
+  entityType String  // Ej: 'journal_entry', 'route_progress', 'favorite'
+  entityId   String  // ID generado por el cliente (UUID). Ej: ID de la nota del diario.
+
+  // El contenido
+  data       Json    // Payload. Idealmente el cliente lo envía cifrado.
+  
+  // Control de sincronización
+  deviceUpdatedAt DateTime // Cuándo ocurrió el cambio en el celular
+  serverUpdatedAt DateTime @updatedAt // Cuándo llegó al servidor
+  
+  isDeleted  Boolean @default(false) // "Tombstone": Si es true, el cliente debe borrarlo
+
+  // Regla: Un usuario no puede tener dos registros con el mismo ID y Tipo
+  @@unique([userId, entityType, entityId])
+}
+
+model HelpResource {
+  id          String   @id @default(uuid())
+  
+  country     String   // Ej: 'MX', 'CO', 'ES', 'GLOBAL'
+  name        String   // Ej: 'Línea de la Vida'
+  description String?  // Ej: 'Atención psicológica 24h'
+  
+  phoneNumber String?  // Ej: '800-911-2000'
+  websiteUrl  String?  // Link externo
+  
+  isEmergency Boolean  @default(false) // true = resaltar en rojo (ambulancia/policia)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  
+  adminId   String   // Quién hizo la acción
+  action    String   // Ej: 'DELETE_USER', 'CREATE_RESOURCE'
+  targetId  String?  // A qué objeto afectó (ID del usuario borrado, etc.)
+  details   String?  // JSON o texto con info extra
+  
+  createdAt DateTime @default(now())
+}
