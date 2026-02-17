@@ -5,7 +5,7 @@ import { UpdateContentDto } from './dto/update-content.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { AuthUser } from '../common/interfaces/auth-user.interface';
+import type { AuthUser } from '../common/interfaces/auth-user.interface';
 
 @ApiTags('Content Delivery')
 @ApiBearerAuth()
