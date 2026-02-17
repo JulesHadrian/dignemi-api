@@ -12,10 +12,20 @@ export class CreateContentDto {
   @IsNotEmpty()
   title: string;
 
+  @ApiProperty({ example: 'Una descripción breve del contenido', required: false })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
   @ApiProperty({ example: 'ansiedad' })
   @IsString()
   @IsOptional()
   topic?: string;
+
+  @ApiProperty({ example: 'es-LATAM', default: 'es-LATAM', required: false })
+  @IsString()
+  @IsOptional()
+  locale?: string;
 
   @ApiProperty({ example: { steps: [], intro: "..." } })
   @IsNotEmpty()
@@ -25,4 +35,24 @@ export class CreateContentDto {
   @IsArray()
   @IsOptional()
   sources?: string[];
+
+  @ApiProperty({ example: 'disclaimer-001', required: false })
+  @IsString()
+  @IsOptional()
+  disclaimerId?: string;
+
+  @ApiProperty({ example: 1, default: 1, required: false })
+  @IsInt()
+  @IsOptional()
+  version?: number;
+
+  @ApiProperty({ example: true, default: true, required: false, description: 'Si es true, requiere suscripción activa' })
+  @IsBoolean()
+  @IsOptional()
+  isPremium?: boolean;
+
+  @ApiProperty({ example: true, default: true, required: false })
+  @IsBoolean()
+  @IsOptional()
+  isPublished?: boolean;
 }
