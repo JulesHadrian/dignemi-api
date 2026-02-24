@@ -11,10 +11,10 @@ export class PrivacyService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        consent: true,            // Sus permisos
-        entitlements: true,       // Su suscripción actual
-        syncRecords: true,        // Sus datos de backup (diario, progreso)
-        // No incluimos 'purchaseReceipts' porque son registros contables internos, 
+        consent: true, // Sus permisos
+        entitlements: true, // Su suscripción actual
+        syncRecords: true, // Sus datos de backup (diario, progreso)
+        // No incluimos 'purchaseReceipts' porque son registros contables internos,
         // pero podrías incluirlos si el legal lo requiere.
       },
     });
@@ -24,7 +24,7 @@ export class PrivacyService {
     // Limpiamos campos sensibles de seguridad antes de entregar
     // (Aunque en este MVP no guardamos password, es buena práctica)
     const { ...cleanUser } = user;
-    
+
     return {
       _generatedAt: new Date(),
       user: cleanUser,
@@ -33,10 +33,10 @@ export class PrivacyService {
 
   // 2. Borrar cuenta permanentemente (Derecho al Olvido)
   async deleteAccount(userId: string) {
-    // Al ejecutar delete sobre el usuario, Prisma/Postgres 
+    // Al ejecutar delete sobre el usuario, Prisma/Postgres
     // borrará en cascada: Consent, Entitlements y SyncRecords.
     // Los recibos (PurchaseReceipt) se quedarán huérfanos para contabilidad (deseable).
-    
+
     return this.prisma.user.delete({
       where: { id: userId },
     });

@@ -1,6 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import * as admin from 'firebase-admin';
+import * as bcrypt from 'bcrypt';
+
+const BCRYPT_SALT_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
@@ -9,47 +17,111 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // Paso 1: Usuario pide entrar. Generamos un token temporal.
-  async sendMagicLink(email: string) {
-    // En producción: Aquí buscarías o crearías el usuario, o solo verificarías si existe.
-    // Para MVP rápido "Growth": Creamos el usuario si no existe (Sign Up implícito)
-    let user = await this.usersService.findOneByEmail(email);
-    if (!user) {
-      user = await this.usersService.create(email);
+  async register(email: string, password: string, name?: string) {
+    const existing = await this.usersService.findOneByEmail(email);
+    if (existing) {
+      throw new ConflictException('El correo electrónico ya está registrado');
     }
 
-    // Generamos un token de corta duración (15 min) solo para el login
-    const payload = { email: user.email, sub: user.id, type: 'magic-link' };
-    const token = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+    const user = await this.usersService.create(email, passwordHash, name);
 
-    // SIMULACIÓN DE EMAIL (En prod: usar SendGrid/AWS SES)
-    console.log(`\n📧 --- EMAIL SIMULADO --- 📧`);
-    console.log(`Para: ${email}`);
-    console.log(`Link: http://localhost:3000/v1/auth/callback?token=${token}`);
-    console.log(`-----------------------------\n`);
+    const sessionPayload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+      country: user.country,
+    };
 
-    return { message: 'Magic link enviado (revisar consola del servidor)' };
+    return {
+      access_token: this.jwtService.sign(sessionPayload),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatarUrl,
+      },
+    };
   }
 
-  // Paso 2: Usuario hace clic en el link. Validamos y damos el token real.
-  async validateMagicLink(token: string) {
+  async login(email: string, password: string) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (!user.passwordHash) {
+      throw new UnauthorizedException(
+        'Esta cuenta fue creada con Google. Por favor, inicia sesión con Google.',
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (user.deletedAt) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const sessionPayload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+      country: user.country,
+    };
+
+    return {
+      access_token: this.jwtService.sign(sessionPayload),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatarUrl,
+      },
+    };
+  }
+
+  async googleLogin(idToken: string) {
     try {
-      const payload = this.jwtService.verify(token);
-      if (payload.type !== 'magic-link') {
-        throw new UnauthorizedException('Token inválido');
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+      const email = decodedToken.email;
+      if (!email) {
+        throw new UnauthorizedException('Invalid Google token');
       }
 
-      const user = await this.usersService.findOneById(payload.sub);
-      if (!user) throw new UnauthorizedException('Usuario no encontrado');
+      const name = decodedToken.name || null;
+      const picture = decodedToken.picture || null;
 
-      // Generamos el Access Token real (sesión larga)
-      const sessionPayload = { email: user.email, sub: user.id, role: user.role, country: user.country };
+      const user = await this.usersService.findOrCreateByGoogle(
+        email,
+        name,
+        picture,
+      );
+
+      const sessionPayload = {
+        email: user.email,
+        sub: user.id,
+        role: user.role,
+        country: user.country,
+      };
+
       return {
         access_token: this.jwtService.sign(sessionPayload),
-        user: user
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatar: user.avatarUrl,
+        },
       };
-    } catch (e) {
-      throw new UnauthorizedException('Link expirado o inválido');
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Invalid Google token');
     }
   }
 }

@@ -14,7 +14,9 @@ export class SyncService {
   private async checkPermission(userId: string) {
     const consent = await this.consentService.getConsent(userId);
     if (!consent.sync) {
-      throw new ForbiddenException('Sincronización desactivada por el usuario (Privacy settings)');
+      throw new ForbiddenException(
+        'Sincronización desactivada por el usuario (Privacy settings)',
+      );
     }
   }
 
@@ -23,7 +25,7 @@ export class SyncService {
     await this.checkPermission(userId);
 
     const results: string[] = [];
-    
+
     // Procesamos en transacción para consistencia (o bucle simple para MVP)
     // Usamos Upsert: si existe lo actualiza, si no lo crea.
     for (const change of dto.changes) {

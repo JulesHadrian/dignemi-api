@@ -1,4 +1,11 @@
-import { Controller, Get, Delete, UseGuards, Request, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Delete,
+  UseGuards,
+  Request,
+  HttpCode,
+} from '@nestjs/common';
 import { PrivacyService } from './privacy.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';

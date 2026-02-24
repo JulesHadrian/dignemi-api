@@ -9,4 +9,5 @@ export const envSchema = Joi.object({
   JWT_SECRET: Joi.string().required(),
   POSTHOG_API_KEY: Joi.string().optional().allow(''), // Opcional para dev
   POSTHOG_HOST: Joi.string().default('https://app.posthog.com'),
+  FIREBASE_PROJECT_ID: Joi.string().required(),
 });

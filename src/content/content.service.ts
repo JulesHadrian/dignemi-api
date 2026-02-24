@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
@@ -20,7 +24,10 @@ export class ContentService {
     });
 
     // Validar que tiene suscripción activa o en trial
-    if (!entitlement || (entitlement.status !== 'ACTIVE' && entitlement.status !== 'TRIAL')) {
+    if (
+      !entitlement ||
+      (entitlement.status !== 'ACTIVE' && entitlement.status !== 'TRIAL')
+    ) {
       throw new ForbiddenException(
         'Este contenido es premium. Necesitas una suscripción activa para acceder.',
       );
@@ -29,7 +36,9 @@ export class ContentService {
     // Si está en ACTIVE, validar que no haya expirado
     if (entitlement.status === 'ACTIVE' && entitlement.expiresAt) {
       if (new Date() > entitlement.expiresAt) {
-        throw new ForbiddenException('Tu suscripción ha expirado. Renueva para acceder a contenido premium.');
+        throw new ForbiddenException(
+          'Tu suscripción ha expirado. Renueva para acceder a contenido premium.',
+        );
       }
     }
   }
@@ -67,7 +76,49 @@ export class ContentService {
     return routes;
   }
 
-  // 2. Obtener una Ruta específica por ID (con todo su body)
+  // 2. Obtener Catálogo de Ejercicios (Todo lo que sea 'exercise' publicado)
+  async getExercises(
+    userId: string,
+    topic?: string,
+    locale: string = 'es-LATAM',
+  ) {
+    // Verificar si el usuario tiene acceso premium
+    const entitlement = await this.prisma.subscriptionEntitlement.findUnique({
+      where: { userId },
+    });
+
+    const hasPremiumAccess =
+      entitlement &&
+      (entitlement.status === 'ACTIVE' || entitlement.status === 'TRIAL') &&
+      (!entitlement.expiresAt || new Date() <= entitlement.expiresAt);
+
+    const exercises = await this.prisma.contentItem.findMany({
+      where: {
+        type: 'exercise',
+        isPublished: true,
+        locale,
+        // Filtrar por topic si se proporciona
+        ...(topic && { topic }),
+        // Si no tiene premium, solo mostrar contenido gratuito
+        ...(!hasPremiumAccess && { isPremium: false }),
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        topic: true,
+        version: true,
+        isPremium: true, // Incluir para que el cliente sepa si es premium
+      },
+      orderBy: {
+        createdAt: 'desc', // Más recientes primero
+      },
+    });
+
+    return exercises;
+  }
+
+  // 3. Obtener una Ruta específica por ID (con todo su body)
   async getRoute(id: string, userId: string) {
     const route = await this.prisma.contentItem.findUnique({
       where: { id },
@@ -83,7 +134,7 @@ export class ContentService {
     return route;
   }
 
-  // 3. Biblioteca: Buscar ejercicios o artículos por tema
+  // 4. Biblioteca: Buscar ejercicios o artículos por tema
   async getLibrary(userId: string, topic?: string, type?: string) {
     // Verificar si el usuario tiene acceso premium
     const entitlement = await this.prisma.subscriptionEntitlement.findUnique({
@@ -107,7 +158,7 @@ export class ContentService {
     });
   }
 
-  // 4. Detalle de ejercicio/artículo
+  // 5. Detalle de ejercicio/artículo
   async getItem(id: string, userId: string) {
     const item = await this.prisma.contentItem.findUnique({ where: { id } });
 
@@ -121,7 +172,7 @@ export class ContentService {
     return item;
   }
 
-  // 5. [DEV/ADMIN] Crear contenido (Para poder poblar la DB)
+  // 6. [DEV/ADMIN] Crear contenido (Para poder poblar la DB)
   async create(dto: CreateContentDto) {
     return this.prisma.contentItem.create({
       data: {
@@ -131,7 +182,7 @@ export class ContentService {
     });
   }
 
-  // 6. [DEV/ADMIN] Actualizar contenido existente
+  // 7. [DEV/ADMIN] Actualizar contenido existente
   async update(id: string, dto: UpdateContentDto) {
     // Verificar que el contenido existe
     const existingContent = await this.prisma.contentItem.findUnique({

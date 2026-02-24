@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { EntitlementsService } from './entitlements.service';
 import { ValidatePurchaseDto } from './dto/validate-purchase.dto';
 import { AuthGuard } from '@nestjs/passport';

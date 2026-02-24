@@ -1,9 +1,23 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { ContentService } from './content.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../common/interfaces/auth-user.interface';
 
@@ -17,19 +31,40 @@ export class ContentController {
   // --- Endpoints de Consumo (App) ---
 
   @Get('catalog')
-  @ApiOperation({ summary: 'Obtener catálogo de rutas disponibles (filtra por acceso premium)' })
+  @ApiOperation({
+    summary:
+      'Obtener catálogo de rutas disponibles (filtra por acceso premium)',
+  })
   getCatalog(@CurrentUser() user: AuthUser) {
     return this.contentService.getCatalog(user.userId);
   }
 
+  @Get('exercises')
+  @ApiOperation({
+    summary:
+      'Obtener catálogo de ejercicios disponibles (filtra por acceso premium)',
+  })
+  @ApiQuery({
+    name: 'topic',
+    required: false,
+    description: 'Filtrar por tema (ej: ansiedad, sueño)',
+  })
+  getExercises(@CurrentUser() user: AuthUser, @Query('topic') topic?: string) {
+    return this.contentService.getExercises(user.userId, topic);
+  }
+
   @Get('routes/:id')
-  @ApiOperation({ summary: 'Cargar una ruta completa con sus pasos (valida acceso premium)' })
+  @ApiOperation({
+    summary: 'Cargar una ruta completa con sus pasos (valida acceso premium)',
+  })
   getRoute(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     return this.contentService.getRoute(id, user.userId);
   }
 
   @Get('library')
-  @ApiOperation({ summary: 'Biblioteca de recursos sueltos (filtra por acceso premium)' })
+  @ApiOperation({
+    summary: 'Biblioteca de recursos sueltos (filtra por acceso premium)',
+  })
   @ApiQuery({ name: 'topic', required: false })
   @ApiQuery({ name: 'type', required: false, enum: ['exercise', 'article'] })
   getLibrary(
@@ -41,7 +76,9 @@ export class ContentController {
   }
 
   @Get('items/:id')
-  @ApiOperation({ summary: 'Obtener un item específico (valida acceso premium)' })
+  @ApiOperation({
+    summary: 'Obtener un item específico (valida acceso premium)',
+  })
   getItem(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     return this.contentService.getItem(id, user.userId);
   }

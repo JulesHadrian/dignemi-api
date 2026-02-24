@@ -1,30 +1,46 @@
-import { Controller, Post, Body, Get, Query, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { IsEmail } from 'class-validator';
-
-// DTO simple para validar el body
-class LoginDto {
-  @IsEmail()
-  email: string;
-}
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { RegisterDto, LoginDto, GoogleLoginDto } from './dto/auth.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
-  @ApiOperation({ summary: 'Solicitar Magic Link' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.sendMagicLink(loginDto.email);
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar nuevo usuario con email y contraseña' })
+  @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
+  @ApiResponse({ status: 409, description: 'El email ya está registrado' })
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto.email, dto.password, dto.name);
   }
 
-  @Get('callback')
-  @ApiOperation({ summary: 'Validar Magic Link (Click desde email)' })
-  async callback(@Query('token') token: string) {
-    return this.authService.validateMagicLink(token);
+  @Post('login')
+  @ApiOperation({ summary: 'Iniciar sesión con email y contraseña' })
+  @ApiResponse({ status: 200, description: 'Login exitoso, retorna JWT' })
+  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
+  async login(@Body() dto: LoginDto) {
+    return this.authService.login(dto.email, dto.password);
+  }
+
+  @Post('google')
+  @ApiOperation({ summary: 'Login con Google (Firebase)' })
+  async googleLogin(@Body() dto: GoogleLoginDto) {
+    return this.authService.googleLogin(dto.idToken);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -32,6 +48,6 @@ export class AuthController {
   @Get('me')
   @ApiOperation({ summary: 'Obtener perfil del usuario actual' })
   getProfile(@Request() req) {
-    return req.user; // Retorna { userId, email } decodificado del token
+    return req.user;
   }
 }

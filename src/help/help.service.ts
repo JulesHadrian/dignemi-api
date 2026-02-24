@@ -41,6 +41,6 @@ export class HelpService {
 
   // 3. Borrar recurso (Admin)
   async delete(id: string) {
-      return this.prisma.helpResource.delete({ where: { id }});
+    return this.prisma.helpResource.delete({ where: { id } });
   }
 }

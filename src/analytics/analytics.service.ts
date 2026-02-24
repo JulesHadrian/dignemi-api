@@ -34,9 +34,9 @@ export class AnalyticsService implements OnModuleInit {
     // 2. Gobernanza de Datos (Sanitización básica)
     // Evitamos enviar propiedades que parezcan texto libre o PII obvio si se colaron
     const safeProperties = { ...dto.properties };
-    
+
     // Ejemplo: Si por error la app manda 'email' en las propiedades, lo borramos
-    delete safeProperties['email']; 
+    delete safeProperties['email'];
     delete safeProperties['password'];
     delete safeProperties['diary_content']; // Nunca enviar contenido del diario
 

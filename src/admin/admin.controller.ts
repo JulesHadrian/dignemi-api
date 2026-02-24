@@ -1,4 +1,12 @@
-import { Controller, Get, Delete, Param, UseGuards, Query, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Delete,
+  Param,
+  UseGuards,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -29,14 +37,15 @@ export class AdminController {
   @Delete('users/:id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Banear usuario (Borrado forzoso)' })
-  deleteUser(@Param('id') id: string, @Request() req) { // <--- Inyectar Request
-  return this.adminService.deleteUser(id, req.user.userId); // <--- Pasar el ID
-}
-  
+  deleteUser(@Param('id') id: string, @Request() req) {
+    // <--- Inyectar Request
+    return this.adminService.deleteUser(id, req.user.userId); // <--- Pasar el ID
+  }
+
   @Delete('content/:id')
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Eliminar contenido obsoleto o incorrecto' })
   deleteContent(@Param('id') id: string) {
-      return this.adminService.deleteContent(id);
+    return this.adminService.deleteContent(id);
   }
 }

@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt, IsBoolean, IsArray, IsJSON } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  IsBoolean,
+  IsArray,
+  IsJSON,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateContentDto {
@@ -12,7 +20,10 @@ export class CreateContentDto {
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty({ example: 'Una descripción breve del contenido', required: false })
+  @ApiProperty({
+    example: 'Una descripción breve del contenido',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   description?: string;
@@ -27,7 +38,7 @@ export class CreateContentDto {
   @IsOptional()
   locale?: string;
 
-  @ApiProperty({ example: { steps: [], intro: "..." } })
+  @ApiProperty({ example: { steps: [], intro: '...' } })
   @IsNotEmpty()
   body: any; // Validado como objeto JSON al llegar
 
@@ -46,7 +57,12 @@ export class CreateContentDto {
   @IsOptional()
   version?: number;
 
-  @ApiProperty({ example: true, default: true, required: false, description: 'Si es true, requiere suscripción activa' })
+  @ApiProperty({
+    example: true,
+    default: true,
+    required: false,
+    description: 'Si es true, requiere suscripción activa',
+  })
   @IsBoolean()
   @IsOptional()
   isPremium?: boolean;

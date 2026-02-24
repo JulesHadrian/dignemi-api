@@ -26,11 +26,10 @@ export class EntitlementsService {
 
   // 2. Validar compra (Simulación para MVP)
   async validatePurchase(userId: string, dto: ValidatePurchaseDto) {
-    
     // --- SIMULACIÓN DE VALIDACIÓN EXTERNA ---
     // En producción, aquí usarías librerías como 'google-play-billing-validator' o 'apple-receipt-verify'
-    const isMockValid = dto.receipt !== 'recibo_invalido'; 
-    
+    const isMockValid = dto.receipt !== 'recibo_invalido';
+
     if (!isMockValid) {
       await this.logReceipt(userId, dto, 'INVALID');
       throw new BadRequestException('La tienda rechazó el recibo');
@@ -66,7 +65,11 @@ export class EntitlementsService {
   }
 
   // Helper para guardar log
-  private async logReceipt(userId: string, dto: ValidatePurchaseDto, status: string) {
+  private async logReceipt(
+    userId: string,
+    dto: ValidatePurchaseDto,
+    status: string,
+  ) {
     await this.prisma.purchaseReceipt.create({
       data: {
         userId,

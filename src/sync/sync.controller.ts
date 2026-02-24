@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  HttpCode,
+} from '@nestjs/common';
 import { SyncService } from './sync.service';
 import { PushSyncDto, PullSyncDto } from './dto/sync.dto';
 import { AuthGuard } from '@nestjs/passport';

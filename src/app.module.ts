@@ -20,7 +20,6 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { HelpModule } from './help/help.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,7 +27,21 @@ import { HelpModule } from './help/help.module';
       validationSchema: envSchema,
       envFilePath: '.env',
     }),
-    AuthModule, UsersModule, EntitlementsModule, ReceiptsModule, ContentModule, SyncModule, FlagsModule, ConsentModule, AdminModule, AuditModule, HealthModule,AnalyticsModule,PrivacyModule, HelpModule],
+    AuthModule,
+    UsersModule,
+    EntitlementsModule,
+    ReceiptsModule,
+    ContentModule,
+    SyncModule,
+    FlagsModule,
+    ConsentModule,
+    AdminModule,
+    AuditModule,
+    HealthModule,
+    AnalyticsModule,
+    PrivacyModule,
+    HelpModule,
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],

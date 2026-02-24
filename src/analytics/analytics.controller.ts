@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  HttpCode,
+} from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { TrackEventDto } from './dto/track-event.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -13,7 +20,9 @@ export class AnalyticsController {
 
   @Post('track')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Enviar evento de analítica (sujeto a consentimiento)' })
+  @ApiOperation({
+    summary: 'Enviar evento de analítica (sujeto a consentimiento)',
+  })
   track(@Request() req, @Body() dto: TrackEventDto) {
     return this.analyticsService.trackEvent(req.user.userId, dto);
   }

@@ -10,8 +10,8 @@ export class FlagsService implements OnModuleInit {
   // Aquí defines qué valores devolver si no hay conexión con PostHog
   private readonly defaultFlags = {
     'show-new-onboarding': 'variant-a', // variante A vs B
-    'paywall-delay-seconds': 5,         // valor numérico
-    'enable-christmas-theme': false,    // toggle simple
+    'paywall-delay-seconds': 5, // valor numérico
+    'enable-christmas-theme': false, // toggle simple
   };
 
   constructor(private configService: ConfigService) {}
@@ -24,7 +24,9 @@ export class FlagsService implements OnModuleInit {
       this.client = new PostHog(apiKey, { host });
       console.log('🚩 PostHog inicializado correctamente');
     } else {
-      console.log('⚠️ PostHog no configurado. Usando flags locales (Mock Mode).');
+      console.log(
+        '⚠️ PostHog no configurado. Usando flags locales (Mock Mode).',
+      );
     }
   }
 
@@ -34,7 +36,7 @@ export class FlagsService implements OnModuleInit {
       try {
         // Obtenemos todas las flags activas para este usuario
         const flags = await this.client.getAllFlags(userId);
-        return flags; 
+        return flags;
       } catch (error) {
         console.error('Error fetching flags from PostHog:', error);
         // Fallback a defaults en caso de error de red

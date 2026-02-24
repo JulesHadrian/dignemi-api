@@ -6,6 +6,6 @@ import { PrismaService } from '../prisma.service';
 @Module({
   controllers: [ConsentController],
   providers: [ConsentService, PrismaService],
-  exports: [ConsentService]
+  exports: [ConsentService],
 })
 export class ConsentModule {}
