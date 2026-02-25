@@ -1,11 +1,10 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
-import * as admin from 'firebase-admin';
 
 @Module({
   imports: [
@@ -23,14 +22,4 @@ import * as admin from 'firebase-admin';
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })
-export class AuthModule implements OnModuleInit {
-  constructor(private configService: ConfigService) {}
-
-  onModuleInit() {
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        projectId: this.configService.get<string>('FIREBASE_PROJECT_ID'),
-      });
-    }
-  }
-}
+export class AuthModule {}

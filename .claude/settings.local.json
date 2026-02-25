@@ -7,7 +7,12 @@
       "Bash(npm run lint:*)",
       "Bash(tasklist:*)",
       "Bash(findstr:*)",
-      "Bash(tasklist.exe:*)"
+      "Bash(tasklist.exe:*)",
+      "Bash(npm run test)",
+      "Bash(npx prisma migrate status)",
+      "Bash(npm install google-auth-library)",
+      "Bash(npm uninstall firebase-admin)",
+      "Bash(npx tsc --noEmit)"
     ]
   }
 }

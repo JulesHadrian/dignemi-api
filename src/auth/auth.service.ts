@@ -5,17 +5,25 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as admin from 'firebase-admin';
+import { OAuth2Client } from 'google-auth-library';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 const BCRYPT_SALT_ROUNDS = 10;
 
 @Injectable()
 export class AuthService {
+  private googleClient: OAuth2Client;
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client(
+      this.configService.get<string>('GOOGLE_CLIENT_ID'),
+    );
+  }
 
   async register(email: string, password: string, name?: string) {
     const existing = await this.usersService.findOneByEmail(email);
@@ -85,15 +93,19 @@ export class AuthService {
 
   async googleLogin(idToken: string) {
     try {
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
 
-      const email = decodedToken.email;
-      if (!email) {
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
         throw new UnauthorizedException('Invalid Google token');
       }
 
-      const name = decodedToken.name || null;
-      const picture = decodedToken.picture || null;
+      const email = payload.email;
+      const name = payload.name || null;
+      const picture = payload.picture || null;
 
       const user = await this.usersService.findOrCreateByGoogle(
         email,
