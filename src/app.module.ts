@@ -19,6 +19,7 @@ import { HealthModule } from './health/health.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { HelpModule } from './help/help.module';
+import { SeederModule } from './seeder/seeder.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { HelpModule } from './help/help.module';
     AnalyticsModule,
     PrivacyModule,
     HelpModule,
+    SeederModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
