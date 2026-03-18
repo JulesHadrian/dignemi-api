@@ -65,6 +65,7 @@ src/
 ├── help/           # Recursos de ayuda geolocalizada
 ├── privacy/        # Gestión de privacidad y exportación de datos
 ├── receipts/       # Validación de compras (Apple/Google)
+├── seeder/         # Seeds de contenido inicial (tests psicométricos)
 ├── sync/           # Sincronización de datos del usuario
 └── users/          # Gestión de usuarios
 ```
@@ -76,6 +77,35 @@ Cada módulo sigue la estructura estándar de NestJS:
 - **Module**: Configuración de dependencias
 - **DTOs**: Data Transfer Objects con validación
 - **Guards/Decorators**: Autorización y metadatos (cuando aplica)
+
+### Sistema de Seeds
+
+El proyecto tiene un sistema dual de seeding para contenido inicial (tests psicométricos):
+
+#### Componentes
+- **`src/seeder/content-seeds.ts`** — Fuente de verdad con los datos de seeds (array `CONTENT_SEEDS`)
+- **`src/seeder/seeder.service.ts`** — Servicio NestJS que implementa `OnApplicationBootstrap` para ejecutar seeds al iniciar la app (producción)
+- **`src/seeder/seeder.module.ts`** — Módulo importado en `AppModule`
+- **`prisma/seed.ts`** — Script CLI ejecutado con `npx prisma db seed` (desarrollo)
+
+#### Convenciones de Seeds
+- IDs fijos con prefijo `seed-` (ej: `seed-gad2`, `seed-phq9`) para upserts idempotentes
+- Upsert con `update: {}` — solo crea si no existe, nunca sobrescribe
+- Ambos caminos (CLI y bootstrap) comparten la misma fuente de datos (`CONTENT_SEEDS`)
+- `prisma/` está excluido de `tsconfig.build.json` para no contaminar el build de NestJS
+
+#### Seeds Actuales
+| ID | Tipo | Título | Tema |
+|----|------|--------|------|
+| `seed-gad2` | test | GAD-2 | ansiedad |
+| `seed-gad7` | test | GAD-7 | ansiedad |
+| `seed-phq2` | test | PHQ-2 | ánimo bajo |
+| `seed-phq9` | test | PHQ-9 | ánimo bajo |
+
+#### Cómo añadir un nuevo seed
+1. Añadir el objeto al array `CONTENT_SEEDS` en `src/seeder/content-seeds.ts`
+2. Usar un ID fijo con prefijo `seed-` (ej: `seed-dass21`)
+3. El seed se aplicará automáticamente al iniciar la app y con `npx prisma db seed`
 
 ### Base de Datos (Prisma Schema)
 
@@ -181,6 +211,10 @@ npx prisma migrate dev     # Crear y aplicar migraciones
 npx prisma generate        # Generar Prisma Client
 npx prisma studio          # UI visual de BD
 npx prisma db push         # Push schema sin migración
+npx prisma db seed         # Ejecutar seeds manualmente
+
+# Deploy (producción)
+npm run deploy:migrate     # prisma migrate deploy + db seed
 ```
 
 ## Convenciones de Código
@@ -454,6 +488,8 @@ this.auditService.logAction(adminId, 'DELETE_USER', userId, `User email: ${email
    - Generar `JWT_SECRET` seguro
    - Configurar CORS con origins específicos
    - Swagger se deshabilita automáticamente en producción
+   - Seeds se aplican automáticamente al iniciar la app (`OnApplicationBootstrap`)
+   - También disponible con `npm run deploy:migrate` (migrate deploy + db seed)
 
 ## Docker
 

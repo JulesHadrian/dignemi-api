@@ -8,6 +8,38 @@
 
 ---
 
+## [0.0.2] — 2026-03-17
+
+### Añadido
+
+#### Sistema de Seeds para tests psicométricos
+`79163ee`, `8d7673d` — 2026-03-17
+
+Se implementó un sistema dual de seeding para poblar la base de datos con tests psicométricos validados (GAD-2, GAD-7, PHQ-2, PHQ-9).
+
+**Archivos creados:**
+- `src/seeder/content-seeds.ts` — Fuente de verdad con los 4 tests como `ContentItem` con IDs fijos (`seed-*`)
+- `src/seeder/seeder.service.ts` — Servicio que implementa `OnApplicationBootstrap` para ejecutar seeds al iniciar la app
+- `src/seeder/seeder.module.ts` — Módulo importado en `AppModule`
+- `prisma/seed.ts` — Script CLI para `npx prisma db seed`
+
+**Archivos modificados:**
+- `src/app.module.ts` — se importa `SeederModule`
+- `package.json` — se añade config `prisma.seed` y script `deploy:migrate`
+- `tsconfig.build.json` — se excluye `prisma/` del build
+
+> **Notas para la IA:**
+> - Los seeds usan **upsert idempotente** con `update: {}` — ejecutarlos múltiples veces es seguro
+> - IDs fijos con prefijo `seed-` (ej: `seed-gad2`) — no usar UUIDs aleatorios para seeds
+> - Hay **dos caminos** para ejecutar seeds: CLI (`npx prisma db seed`) y bootstrap (`OnApplicationBootstrap`) — ambos leen de `CONTENT_SEEDS`
+> - `prisma/seed.ts` usa `require()` dinámico para importar `content-seeds` sin contaminar el build de NestJS
+> - `tsconfig.build.json` excluye `prisma/` para que `prisma/seed.ts` no se compile en `dist/`
+> - El tipo de contenido de los seeds es `test` (no `exercise` ni `article`) — es un tipo nuevo de `ContentItem`
+> - Cada test tiene estructura completa: preguntas, opciones, scoring, interpretaciones, followUps, disclaimers y fuentes científicas
+> - PHQ-9 incluye `riskFlag` en la pregunta 9 (ideación suicida) con manejo de seguridad especial
+
+---
+
 ## [0.0.1] — 2026-02-24
 
 ### Cambiado
