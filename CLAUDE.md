@@ -237,6 +237,194 @@ npx prisma db push         # Push schema sin migración
 - Validación de recibos de Apple y Google Play
 - Actualización de `SubscriptionEntitlement` tras validación
 
+## Documentación Clave
+
+### Contratos de API
+> **Fuente de verdad**: [`docs/api-contracts.md`](docs/api-contracts.md)
+>
+> - Antes de crear un endpoint → documentarlo ahí
+> - Antes de consumir un endpoint → verificar ahí
+> - Si hay discrepancia entre código y contrato → **el contrato manda**
+
+### Convenciones de Código
+> **Ubicación**: [`docs/conventions.md`](docs/conventions.md)
+>
+> - La ley del proyecto — seguir al pie de la letra
+> - Nombrado, imports, patrones de controllers/services/DTOs, errores, testing
+> - Secciones "Qué hacer" y "Qué NO hacer"
+
+### Changelog
+> **Ubicación**: [`CHANGELOG.md`](CHANGELOG.md)
+>
+> - Memoria histórica del proyecto con contexto para la IA
+> - Cada entrada tiene "Notas para la IA" que explican impacto y decisiones revertidas
+> - Al hacer cambios significativos → añadir entrada al changelog
+
+### Decisiones Arquitectónicas (ADRs)
+> **Ubicación**: [`docs/decisions/`](docs/decisions/)
+> **Template**: [`docs/decisions/_template.md`](docs/decisions/_template.md)
+>
+> - Antes de proponer una alternativa tecnológica → revisar si ya fue descartada en un ADR
+> - Al tomar una decisión nueva → crear un ADR con la sección "Notas para la IA"
+>
+> **ADRs activos:**
+> - [ADR-001: Dependencias Core](docs/decisions/001-dependencias-core.md) — stack, ORM, auth, validación, analytics, testing
+
+## Endpoints Existentes (Inventario)
+
+### Auth (`/v1/auth`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| POST | `/auth/register` | No | Registrar nuevo usuario |
+| POST | `/auth/login` | No | Login con email/password |
+| POST | `/auth/google` | No | Login con Google OAuth |
+| GET | `/auth/me` | JWT | Obtener perfil del usuario autenticado |
+
+### Users (`/v1/users`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| PATCH | `/users/me` | JWT | Actualizar perfil del usuario |
+
+### Content (`/v1/content`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/content/catalog` | JWT | Catálogo de rutas terapéuticas |
+| GET | `/content/exercises` | JWT | Listar ejercicios (query: `topic`) |
+| GET | `/content/routes/:id` | JWT | Detalle de una ruta |
+| GET | `/content/library` | JWT | Biblioteca filtrable (query: `topic`, `type`) |
+| GET | `/content/items/:id` | JWT | Detalle de un contenido |
+| POST | `/content` | JWT | Crear contenido |
+| PATCH | `/content/:id` | JWT | Editar contenido |
+
+### Admin (`/v1/admin`) — Requiere rol `ADMIN`
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/admin/dashboard` | JWT + ADMIN | Estadísticas del dashboard |
+| GET | `/admin/users` | JWT + ADMIN | Listar usuarios (query: `limit`) |
+| DELETE | `/admin/users/:id` | JWT + ADMIN | Eliminar usuario (soft delete) |
+| DELETE | `/admin/content/:id` | JWT + ADMIN | Eliminar contenido |
+
+### Analytics (`/v1/analytics`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| POST | `/analytics/track` | JWT | Enviar evento de tracking |
+
+### Consent (`/v1/consent`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/consent` | JWT | Obtener consentimientos actuales |
+| PUT | `/consent` | JWT | Actualizar consentimientos |
+
+### Entitlements (`/v1/entitlements`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/entitlements` | JWT | Estado de suscripción |
+| POST | `/entitlements/purchase/validate` | JWT | Validar compra de tienda |
+
+### Flags (`/v1/flags`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/flags` | JWT | Obtener feature flags |
+
+### Health (`/v1/health`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/health` | No | Health check (Terminus) |
+
+### Help (`/v1/help`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/help/resources` | JWT | Recursos de ayuda por país |
+| POST | `/help` | JWT + ADMIN | Crear recurso de ayuda |
+| DELETE | `/help/:id` | JWT + ADMIN | Eliminar recurso de ayuda |
+
+### Privacy (`/v1/privacy`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/privacy/export` | JWT | Exportar datos del usuario (GDPR) |
+| DELETE | `/privacy/delete` | JWT | Eliminar cuenta (GDPR) |
+
+### Receipts (`/v1/receipts`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/receipts` | JWT | Listar recibos del usuario |
+
+### Sync (`/v1/sync`)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| POST | `/sync/push` | JWT | Enviar datos del cliente al servidor |
+| POST | `/sync/pull` | JWT | Obtener cambios del servidor |
+
+**Resumen**: 29 endpoints totales — 4 públicos, 18 protegidos con JWT, 7 solo ADMIN.
+
+## Patrones de Manejo de Errores
+
+### Formato estándar de error (AllExceptionsFilter)
+Todas las excepciones se capturan globalmente y devuelven:
+```json
+{
+  "statusCode": 409,
+  "timestamp": "2026-03-17T...",
+  "path": "/v1/auth/register",
+  "error": "El correo electrónico ya está registrado"
+}
+```
+
+### Excepciones usadas en el proyecto
+Solo se usan excepciones nativas de NestJS, **no hay excepciones custom**:
+
+| Excepción | Status | Cuándo usarla |
+|-----------|--------|---------------|
+| `ConflictException` | 409 | Recurso ya existe (ej: email duplicado) |
+| `UnauthorizedException` | 401 | Credenciales inválidas, token inválido, cuenta eliminada |
+| `ForbiddenException` | 403 | Sin acceso premium, sin rol requerido, sync desactivado |
+| `NotFoundException` | 404 | Recurso no encontrado |
+| `BadRequestException` | 400 | Datos inválidos (ej: recibo rechazado) |
+
+### Patrón en servicios
+- Lanzar excepciones directamente, sin try-catch-rethrow innecesario
+- Mensajes de error en **español** para el usuario final
+- No se usa un wrapper de respuesta — las respuestas exitosas devuelven el objeto directamente
+
+### Patrón de auditoría
+```typescript
+// Fire-and-forget — no bloquea la respuesta
+this.auditService.logAction(adminId, 'DELETE_USER', userId, `User email: ${email}`);
+```
+
+## Patrones de Testing
+
+- Tests unitarios en archivos `*.spec.ts` junto al archivo que testean
+- E2E tests en carpeta `test/`
+- Usar `Test.createTestingModule()` para inyección de dependencias en tests
+- Mockear `PrismaService` en tests unitarios
+- **Estado actual**: Solo existe `app.controller.spec.ts` — cobertura mínima
+
+## Reglas Inquebrantables
+
+### Seguridad
+1. **NUNCA** crear un endpoint sin `@UseGuards(AuthGuard('jwt'))` a menos que sea público por diseño (auth/register, auth/login, health)
+2. **NUNCA** exponer datos de un usuario a otro — siempre filtrar por `userId` del token JWT
+3. **NUNCA** commitear secrets, `.env`, o credenciales al repositorio
+4. **NUNCA** poner lógica de negocio en controllers — solo en services
+5. **NUNCA** confiar en datos del cliente sin validar con DTOs y `class-validator`
+
+### Privacidad y GDPR
+6. **NUNCA** enviar datos de analytics sin verificar `consent.analytics === true`
+7. **NUNCA** sincronizar datos sin verificar `consent.sync === true`
+8. **NUNCA** hacer hard delete de usuarios — usar soft delete (`deletedAt`)
+9. **SIEMPRE** incluir los datos del usuario en el endpoint de exportación GDPR (`/privacy/export`)
+
+### Base de Datos
+10. **NUNCA** modificar el schema de Prisma sin crear una migración (`npx prisma migrate dev --name <desc>`)
+11. **SIEMPRE** regenerar el cliente después de cambios al schema (`npx prisma generate`)
+
+### API y Código
+12. **SIEMPRE** documentar endpoints nuevos con decoradores de Swagger (`@ApiTags`, `@ApiOperation`, `@ApiResponse`)
+13. **SIEMPRE** usar excepciones nativas de NestJS — no crear excepciones custom
+14. **SIEMPRE** escribir mensajes de error en español para el usuario final
+15. **SIEMPRE** proteger endpoints de admin con `@Roles('ADMIN')` y `RolesGuard`
+
 ## Notas Importantes
 
 1. **Toda nueva funcionalidad debe**:
@@ -253,6 +441,7 @@ npx prisma db push         # Push schema sin migración
    - Usar decoradores de Swagger apropiados
    - Proteger con guards necesarios
    - Validar con DTOs
+   - **Actualizar el inventario de endpoints en este archivo**
 
 4. **Testing**:
    - Los tests están en archivos `*.spec.ts`

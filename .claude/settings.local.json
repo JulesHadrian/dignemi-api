@@ -12,7 +12,10 @@
       "Bash(npx prisma migrate status)",
       "Bash(npm install google-auth-library)",
       "Bash(npm uninstall firebase-admin)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(find /c/Users/adria/projects/luzentia-backend/test -type f -name *.spec.ts)",
+      "Bash(ls /c/Users/adria/projects/luzentia-backend/src/*/dto/)",
+      "Bash(xargs wc:*)"
     ]
   }
 }
