@@ -6,7 +6,7 @@
 export const CONTENT_SEEDS = [
   {
     id: 'seed-gad2',
-    type: 'test',
+    type: 'assessment',
     title: 'GAD-2',
     description:
       'Escala ultra breve (2 ítems) autoadministrada para tamizaje de ansiedad generalizada en las últimas 2 semanas.',
@@ -64,7 +64,7 @@ export const CONTENT_SEEDS = [
           when: { scoreGTE: 3 },
           recommend: [
             {
-              type: 'test',
+              type: 'assessment',
               id: 'gad7',
               reason:
                 'Confirmar y estimar severidad con una escala más completa.',
@@ -86,7 +86,7 @@ export const CONTENT_SEEDS = [
   },
   {
     id: 'seed-gad7',
-    type: 'test',
+    type: 'assessment',
     title: 'GAD-7',
     description:
       'Cuestionario autoadministrado de 7 ítems para tamizaje y estimación de severidad de síntomas de ansiedad generalizada durante las últimas 2 semanas.',
@@ -252,7 +252,7 @@ export const CONTENT_SEEDS = [
   },
   {
     id: 'seed-phq2',
-    type: 'test',
+    type: 'assessment',
     title: 'PHQ-2',
     description:
       'Cuestionario breve (2 ítems) autoadministrado para tamizaje de depresión (ánimo bajo y anhedonia) durante las últimas 2 semanas. Si el tamizaje es positivo, se recomienda aplicar PHQ-9 para evaluación más completa.',
@@ -310,7 +310,7 @@ export const CONTENT_SEEDS = [
           when: { scoreGTE: 3 },
           recommend: [
             {
-              type: 'test',
+              type: 'assessment',
               id: 'phq9',
               reason:
                 'Evaluación más completa de síntomas depresivos y severidad.',
@@ -334,7 +334,7 @@ export const CONTENT_SEEDS = [
   },
   {
     id: 'seed-phq9',
-    type: 'test',
+    type: 'assessment',
     title: 'PHQ-9',
     description:
       'Cuestionario autoadministrado de 9 ítems para tamizaje, seguimiento y estimación de severidad de síntomas depresivos durante las últimas 2 semanas. Incluye un ítem de ideación suicida que requiere manejo cuidadoso.',
@@ -809,7 +809,7 @@ export const CONTENT_SEEDS = [
                 'Complementa la respiración con liberación de tensión corporal.',
             },
             {
-              type: 'test',
+              type: 'assessment',
               id: 'gad7',
               reason:
                 'Ayuda a estimar mejor la severidad de los síntomas.',
@@ -2217,7 +2217,7 @@ export const CONTENT_SEEDS = [
                 'Útil si además de tensión física hay mucha preocupación mental.',
             },
             {
-              type: 'test',
+              type: 'assessment',
               id: 'gad7',
               reason:
                 'Ayuda a estimar mejor la severidad de los síntomas.',
@@ -2575,7 +2575,7 @@ export const CONTENT_SEEDS = [
                 'Útil si además de activación emocional hay preocupación repetitiva.',
             },
             {
-              type: 'test',
+              type: 'assessment',
               id: 'gad7',
               reason:
                 'Ayuda a estimar mejor la severidad de los síntomas.',
@@ -2908,7 +2908,7 @@ export const CONTENT_SEEDS = [
                 'Útil si el usuario también siente activación física mientras se preocupa.',
             },
             {
-              type: 'test',
+              type: 'assessment',
               id: 'gad7',
               reason:
                 'Ayuda a estimar mejor la severidad de los síntomas.',
@@ -3252,7 +3252,7 @@ export const CONTENT_SEEDS = [
                 'Ayuda si el problema todavía genera activación física antes o después del ejercicio.',
             },
             {
-              type: 'test',
+              type: 'assessment',
               id: 'gad7',
               reason:
                 'Ayuda a estimar mejor la severidad de los síntomas.',
