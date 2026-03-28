@@ -8,6 +8,43 @@
 
 ---
 
+## [0.0.3] — 2026-03-27
+
+### Añadido
+
+#### Seeds de ejercicios terapéuticos para ansiedad
+Se añadieron 9 ejercicios de tipo `exercise` al array `CONTENT_SEEDS` en `src/seeder/content-seeds.ts`, todos vinculados al tema de ansiedad. 8 recomendados según puntuaciones del GAD-2 y 1 según GAD-7.
+
+**Seeds añadidos:**
+| ID | Categoría | Prioridad GAD-2 |
+|----|-----------|-----------------|
+| `seed-respiracion-diafragmatica` | breathing | 0–2: P1, 3–6: P1 |
+| `seed-mindfulness-respiratorio-breve` | mindfulness | 0–2: P2 |
+| `seed-caminata-consciente` | movement | 0–2: P3 |
+| `seed-relajacion-nocturna-breve` | relaxation | 0–2: P4 |
+| `seed-relajacion-muscular-progresiva` | relaxation | 3–6: P2 |
+| `seed-visualizacion-lugar-seguro` | imagery | 3–6: P3 |
+| `seed-tiempo-de-preocupacion` | cognitive | 3–6: P4 |
+| `seed-resolucion-de-problemas-basica` | cognitive_behavioral | 3–6: P5 |
+| `seed-facing-fears-exposicion-gradual` | behavioral | GAD-7 5–9: P6, 10–14: P4 |
+
+**Archivos modificados:**
+- `src/seeder/content-seeds.ts` — se añadieron 9 objetos al array `CONTENT_SEEDS`
+- `CLAUDE.md` — se actualizó la tabla de seeds actuales y descripciones del seeder
+- `CHANGELOG.md` — esta entrada
+
+> **Notas para la IA:**
+> - Es la primera vez que se añaden seeds de tipo `exercise` — antes solo existían `test`
+> - Los ejercicios tienen una estructura de body muy distinta a los tests: incluyen `steps`, `defaultProtocol`, `alternativeProtocols`, `guidedExperience`, `interactionModel`, `progressTracking`, `completionCriteria` y `commonDifficulties`
+> - Cada ejercicio tiene un campo `recommendedFor` que lo vincula a un test (GAD-2) y rangos de puntuación con prioridad — esto permite que la app recomiende ejercicios según resultados de tamizaje
+> - Los ejercicios de rango GAD-2 0–2 son preventivos/regulatorios (respiración, mindfulness, caminata, relajación nocturna); los de rango GAD-2 3–6 son para ansiedad más marcada (relajación muscular, visualización, manejo de preocupación, resolución de problemas); el ejercicio de exposición gradual se vincula al GAD-7 (rangos 5–9 y 10–14) y es el primero de dificultad `intermediate`
+> - Los ejercicios se referencian entre sí en `nextStepSuggestions` — forman una red de recomendaciones cruzadas
+> - Todos los ejercicios tienen `sources: []` — no incluyen referencias bibliográficas aún
+> - Todos son `isPremium: false` e `isPublished: true`
+> - Los IDs siguen la convención `seed-` + slug del ejercicio (ej: `seed-respiracion-diafragmatica`)
+
+---
+
 ## [0.0.2] — 2026-03-17
 
 ### Añadido

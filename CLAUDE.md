@@ -65,7 +65,7 @@ src/
 ├── help/           # Recursos de ayuda geolocalizada
 ├── privacy/        # Gestión de privacidad y exportación de datos
 ├── receipts/       # Validación de compras (Apple/Google)
-├── seeder/         # Seeds de contenido inicial (tests psicométricos)
+├── seeder/         # Seeds de contenido inicial (tests y ejercicios)
 ├── sync/           # Sincronización de datos del usuario
 └── users/          # Gestión de usuarios
 ```
@@ -80,7 +80,7 @@ Cada módulo sigue la estructura estándar de NestJS:
 
 ### Sistema de Seeds
 
-El proyecto tiene un sistema dual de seeding para contenido inicial (tests psicométricos):
+El proyecto tiene un sistema dual de seeding para contenido inicial (tests psicométricos y ejercicios terapéuticos):
 
 #### Componentes
 - **`src/seeder/content-seeds.ts`** — Fuente de verdad con los datos de seeds (array `CONTENT_SEEDS`)
@@ -101,6 +101,15 @@ El proyecto tiene un sistema dual de seeding para contenido inicial (tests psico
 | `seed-gad7` | test | GAD-7 | ansiedad |
 | `seed-phq2` | test | PHQ-2 | ánimo bajo |
 | `seed-phq9` | test | PHQ-9 | ánimo bajo |
+| `seed-respiracion-diafragmatica` | exercise | Respiración diafragmática | ansiedad |
+| `seed-mindfulness-respiratorio-breve` | exercise | Mindfulness respiratorio breve | ansiedad |
+| `seed-caminata-consciente` | exercise | Caminata consciente | ansiedad |
+| `seed-relajacion-nocturna-breve` | exercise | Relajación nocturna breve | ansiedad |
+| `seed-relajacion-muscular-progresiva` | exercise | Relajación muscular progresiva | ansiedad |
+| `seed-visualizacion-lugar-seguro` | exercise | Visualización de lugar seguro | ansiedad |
+| `seed-tiempo-de-preocupacion` | exercise | Tiempo de preocupación | ansiedad |
+| `seed-resolucion-de-problemas-basica` | exercise | Resolución de problemas básica | ansiedad |
+| `seed-facing-fears-exposicion-gradual` | exercise | Facing fears / exposición gradual guiada | ansiedad |
 
 #### Cómo añadir un nuevo seed
 1. Añadir el objeto al array `CONTENT_SEEDS` en `src/seeder/content-seeds.ts`
