@@ -331,7 +331,7 @@ npm run deploy:migrate     # prisma migrate deploy + db seed
 ### Content (`/v1/content`)
 | Método | Ruta | Auth | Descripción |
 |--------|------|------|-------------|
-| GET | `/content/catalog` | JWT | Catálogo de rutas terapéuticas |
+| GET | `/content/catalog` | JWT | Catálogo de contenido (todos los tipos, filtrable por `?type`) |
 | GET | `/content/exercises` | JWT | Listar ejercicios (query: `topic`) |
 | GET | `/content/routes/:id` | JWT | Detalle de una ruta |
 | GET | `/content/library` | JWT | Biblioteca filtrable (query: `topic`, `type`) |

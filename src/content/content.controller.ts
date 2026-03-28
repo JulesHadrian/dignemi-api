@@ -33,10 +33,15 @@ export class ContentController {
   @Get('catalog')
   @ApiOperation({
     summary:
-      'Obtener catálogo de rutas disponibles (filtra por acceso premium)',
+      'Obtener catálogo de contenido disponible (filtra por acceso premium)',
   })
-  getCatalog(@CurrentUser() user: AuthUser) {
-    return this.contentService.getCatalog(user.userId);
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    description: 'Filtrar por tipo de contenido (ej: route, exercise, article, day)',
+  })
+  getCatalog(@CurrentUser() user: AuthUser, @Query('type') type?: string) {
+    return this.contentService.getCatalog(user.userId, type);
   }
 
   @Get('exercises')

@@ -43,8 +43,8 @@ export class ContentService {
     }
   }
 
-  // 1. Obtener Catálogo (Todo lo que sea 'route' publicado)
-  async getCatalog(userId: string, locale: string = 'es-LATAM') {
+  // 1. Obtener Catálogo (todos los tipos publicados, filtrable por type)
+  async getCatalog(userId: string, type?: string, locale: string = 'es-LATAM') {
     // Verificar si el usuario tiene acceso premium
     const entitlement = await this.prisma.subscriptionEntitlement.findUnique({
       where: { userId },
@@ -55,11 +55,12 @@ export class ContentService {
       (entitlement.status === 'ACTIVE' || entitlement.status === 'TRIAL') &&
       (!entitlement.expiresAt || new Date() <= entitlement.expiresAt);
 
-    const routes = await this.prisma.contentItem.findMany({
+    const items = await this.prisma.contentItem.findMany({
       where: {
-        type: 'route',
         isPublished: true,
         locale,
+        // Filtrar por type si se proporciona
+        ...(type && { type }),
         // Si no tiene premium, solo mostrar contenido gratuito
         ...(!hasPremiumAccess && { isPremium: false }),
       },
@@ -68,12 +69,13 @@ export class ContentService {
         title: true,
         description: true,
         topic: true,
+        type: true,
         version: true,
-        isPremium: true, // Incluir para que el cliente sepa si es premium
+        isPremium: true,
       },
     });
 
-    return routes;
+    return items;
   }
 
   // 2. Obtener Catálogo de Ejercicios (Todo lo que sea 'exercise' publicado)

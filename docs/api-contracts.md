@@ -249,9 +249,15 @@ Actualizar perfil del usuario (onboarding, preferencias de locale).
 
 ### `GET /v1/content/catalog`
 
-Catálogo de rutas terapéuticas publicadas. Filtra contenido premium según suscripción del usuario.
+Catálogo de todo el contenido publicado, filtrable por tipo. Filtra contenido premium según suscripción del usuario.
 
 **Auth:** JWT
+
+**Query Parameters:**
+
+| Param | Tipo | Requerido | Valores |
+|-------|------|-----------|---------|
+| `type` | string | No | `route`, `exercise`, `article`, `day` |
 
 **Response `200`:**
 
@@ -261,12 +267,13 @@ Array<{
   title: string
   description: string | null
   topic: string | null
+  type: string
   version: number
   isPremium: boolean
 }>
 ```
 
-**Lógica:** Solo devuelve items con `type = "route"` y `isPublished = true`. Usuarios sin premium solo ven `isPremium: false`.
+**Lógica:** Devuelve items con `isPublished = true`. Si se pasa `type`, filtra por ese tipo; sin `type` devuelve todos los tipos. Usuarios sin premium solo ven `isPremium: false`.
 
 ---
 
